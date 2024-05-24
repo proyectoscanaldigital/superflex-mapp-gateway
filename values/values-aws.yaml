@@ -1,0 +1,137 @@
+# Default values for superflex-mapp-gateway.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+ 
+replicaCount: 1
+
+serviceName: "superflex-mapp-gateway"
+
+consul:
+  enabled: true
+  host: "consul-headless.common.svc"
+  port: "8500"
+  security:
+    enabled: true
+    aclToken: "3cb06683-1351-ccc1-2167-2ff33417e696"
+
+image:
+  repository: harbor.eks.glic-solutions.com/glic/superflex-mapp-gateway
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+imagePullSecrets:
+  - name: docker-login
+nameOverride: ""
+fullnameOverride: ""
+
+ports:
+  - name: app
+    containerPort: 8090
+    protocol: TCP
+
+# Port should be between 30000-32767
+nodePort:
+  enabled: false
+  port: 30057
+      
+env:
+  - name: SPRING_PROFILES_ACTIVE
+    value: "k8s,production,testdata,sleuth"
+  - name: SPRING_CONFIG_LOCATION
+    value: "classpath:/,file:conf/"
+  - name: POD_IP
+    valueFrom:
+      fieldRef:
+        fieldPath: status.podIP
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 8090
+
+ingress:
+  enabled: true
+  extras: {}
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}, {"HTTP": 80}]'
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:779435572646:certificate/856de97f-6b2a-4cd1-8667-bb67fd6d309b
+    alb.ingress.kubernetes.io/backend-protocol: HTTP
+    alb.ingress.kubernetes.io/healthcheck-path: /actuator/health
+    alb.ingress.kubernetes.io/success-codes: '200'
+    alb.ingress.kubernetes.io/group.name: glic
+  pathType: Prefix
+  hosts:
+    - host: mapi.superflex.eks.glic-solutions.com
+      paths:
+        - /
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources:
+  limits:
+    cpu: 0.75
+    memory: 768Mi
+  requests:
+    cpu: 0.3
+    memory: 256Mi
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  #limits:
+  #  cpu: 250m
+  #  memory: 2048Mi
+  #requests:
+  #  cpu: 100m
+  #  memory: 1024Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+rancherLogging:
+  enabled: false
+  elk:
+    host: "opendistro-es-client-service.monitoring.svc"
+    port: "9200"
+    user: "admin"
+    secret: "opendistro"
+
+tokens: c8a63536,bc08,4e37,9adf,36e3f203ab6d

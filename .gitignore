@@ -1,0 +1,9 @@
+target
+target/
+.idea
+.idea/
+LOG_PATH_IS_UNDEFINED
+logs
+logs/
+Jenkinsfile
+values/Jenkinsfile

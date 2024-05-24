@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ .Chart.Name }}-conf-files"
+data:
+  application-production.yml: |-
+    spring:
+      application:
+        tokens: {{ .Values.tokens }}
+      cloud:
+        {{- if .Values.consul.enabled }}
+        consul:
+          host: {{ .Values.consul.host }}
+          port: {{ .Values.consul.port }}
+          config:
+            enabled: true
+            fail-fast: false
+          discovery:
+            ip-address: ${POD_IP}
+            instanceId: ${spring.application.name}:${random.value}
+            health-check-timeout: 10s
+            health-check-critical-timeout: 1m
+            catalog-services-watch-delay: 10000
+            catalog-services-watch-timeout: 7
+            health-check-interval: 20s
+            heartbeat:
+              enabled: false
+            preferIpAddress: true
+            deregister: false
+            enabled: true
+            {{- if .Values.consul.security.enabled }}
+            acl-token: {{ .Values.consul.security.aclToken }}
+            {{- end }}
+        {{- end }}
+    hazelcast-consul:
+      external-ip: ${POD_IP}
+      {{- if .Values.consul.security.enabled }}
+      acl-token: {{ .Values.consul.security.aclToken }}
+      {{- end }}

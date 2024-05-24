@@ -1,0 +1,152 @@
+spring:
+  zipkin:
+    enabled: false
+  sleuth:
+    enabled: false
+    messaging:
+      kafka:
+        enabled: false
+    main:
+      banner-mode: log
+      allow-bean-definition-overriding: true
+  application:
+    name: superflex-mapp-gateway
+    jwtSecret: asdasdasdASKUHkAHLhGLKHJhKJGKjhVJHJHjhvjHVJjhvjhvjJYVJvJVJVJhVJHvKVKkJK
+    tokens: c8a63536,bc08,4e37,9adf,36e3f203ab6d
+  cloud:
+    gateway:
+      routes:
+        # ============= COMMON APP USERS ROOT
+        - predicates:
+            - Path=/
+          uri: " lb://ms-app-user"
+        # ============= COMMON APP USERS Link
+        - predicates:
+            - Path=/mt-api/ms-app-user/**
+          uri: " lb://ms-app-user"
+          filters:
+            - RewritePath=/mt-api/ms-app-user/(?<segment>.*), /$\{segment}
+        # ============= MS-COMMON-CLIENTS
+        - predicates:
+            - Path=/mt-api/ms-common-clients/**
+          uri: " lb://ms-common-clients"
+          filters:
+            - RewritePath=/mt-api/ms-common-clients/(?<segment>.*), /$\{segment}
+        # ============= MS-COMMON-USER
+        - predicates:
+            - Path=/mt-api/ms-common-user/**
+          uri: " lb://ms-common-user"
+          filters:
+            - RewritePath=/mt-api/ms-common-user/(?<segment>.*), /$\{segment}
+        # ============= MS-TRANSFER-CORE
+        - predicates:
+            - Path=/mt-api/ms-transfer-core/**
+          uri: " lb://ms-transfer-core"
+          filters:
+            - RewritePath=/mt-api/ms-transfer-core/(?<segment>.*), /$\{segment}
+        # ============= CR-COMMON-ORCHESTRATE
+        - predicates:
+            - Path=/mt-api/cr-common-orchestrate/**
+          uri: " lb://cr-common-orchestrate"
+          filters:
+            - RewritePath=/mt-api/cr-common-orchestrate/(?<segment>.*), /$\{segment}
+        # ============= MS-COMMON-HIERARCHY
+        - predicates:
+            - Path=/mt-api/ms-common-hierarchy/**
+          uri: " lb://ms-common-hierarchy"
+          filters:
+            - RewritePath=/mt-api/ms-common-hierarchy/(?<segment>.*), /$\{segment}
+        # ============= ms-sales-plan
+        - predicates:
+            - Path=/mt-api/ms-sales-plan/**
+          uri: " lb://ms-sales-plan"
+          filters:
+            - RewritePath=/mt-api/ms-sales-plan/(?<segment>.*), /$\{segment}
+        # ============= ms-thirdparty-srv-admin
+        - predicates:
+            - Path=/mt-api/ms-thirdparty-srv-admin/**
+          uri: " lb://ms-thirdparty-srv-admin"
+          filters:
+            - RewritePath=/mt-api/ms-thirdparty-srv-admin/(?<segment>.*), /$\{segment}
+        # ============= ms-thirdparty-srv-core
+        - predicates:
+            - Path=/mt-api/ms-thirdparty-srv-core/**
+          uri: " lb://ms-thirdparty-srv-core"
+          filters:
+            - RewritePath=/mt-api/ms-thirdparty-srv-core/(?<segment>.*), /$\{segment}
+        # ============= MS-COMMON-BLOCKLIST
+        - predicates:
+            - Path=/mt-api/ms-common-blocklist/**
+          uri: " lb://ms-common-blocklist"
+          filters:
+            - RewritePath=/mt-api/ms-common-blocklist/(?<segment>.*), /$\{segment}
+        # ============= MS-COMMON-SALESPRINT
+        - predicates:
+            - Path=/mt-api/ms-common-salesprint/**
+          uri: " lb://ms-common-salesprint"
+          filters:
+            - RewritePath=/mt-api/ms-common-salesprint/(?<segment>.*), /$\{segment}
+
+server:
+  port: 8090
+  error:
+    include-stacktrace: never
+    include-exception: false
+    whitelabel:
+      enabled: true
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+    org.springframework.http.server.reactive: INFO
+    org.springframework.web.reactive: INFO
+    reactor.ipc.netty: INFO
+    reactor.netty: INFO
+management:
+  endpoints:
+    web:
+      exposure:
+        exclude: [ 'heapdump' ]
+        include: health,info,prometheus
+  endpoint:
+    health:
+      enabled: true
+    info:
+      enabled: true
+    prometheus:
+      enabled: true
+    metrics:
+      enabled: true
+---
+spring:
+  config:
+    activate:
+      on-profile: sleuth
+  sleuth:
+    scheduled:
+      enabled: false
+    sampler:
+      probability: 1.0
+    enabled: true
+    messaging:
+      kafka:
+        enabled: true
+    async:
+      enabled: false
+    integration:
+      enabled: false
+    grpc:
+      enabled: false
+---
+spring:
+  config:
+    activate:
+      on-profile: zipkin
+  zipkin:
+    enabled: true
+    sender:
+      type: kafka
+    service:
+      name: ${spring.application.name}
+    encoder: json_v2
+  kafka:
+    bootstrap-servers: "localhost:29092"
