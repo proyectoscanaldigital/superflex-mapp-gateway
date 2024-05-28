@@ -32,9 +32,7 @@ public class CustomCsrfWebFilter implements WebFilter {
             new NegatedServerWebExchangeMatcher(
                   ServerWebExchangeMatchers.pathMatchers(
                           POST,
-                          "/mt-api/ms-app-user/users_app_auth/login",
-                          "/mt-api/ms-common-orchestrate/api/chance/parametros-bnet",
-                          "/mt-api/ms-common-orchestrate/api/chance/validar-chance-bnet"
+                          "/mt-api/ms-app-user/users_app_auth/login"
                   )
             )
    );

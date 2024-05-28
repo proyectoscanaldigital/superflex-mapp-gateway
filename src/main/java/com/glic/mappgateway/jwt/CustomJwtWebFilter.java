@@ -123,7 +123,7 @@ public class CustomJwtWebFilter implements WebFilter {
             || path.contains("/auth_rsa/login") || path.contains("/auth_rsa/initauth") || path.contains("/app_user_services/terms_conditions")
             || path.contains("/hierarchy/point_sales/digital_point_sale_by_municipality") || path.contains("/app_user_services/data_policy")
             || path.contains("/client/document_type/app_documents") || path.contains("/app_user_services/latest") || path.contains(
-            "/users_app/document") || path.contains("/api/chance/parametros-bnet") || path.contains("/api/chance/validar-chance-bnet");
+            "/users_app/document") || path.contains("/api/chance/");
    }
 
 }
